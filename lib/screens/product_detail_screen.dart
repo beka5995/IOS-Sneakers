@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/cart_provider.dart';
 
 import '../models/product.dart';
 import '../state/store_controller.dart';
@@ -156,7 +159,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ));
                       return;
                     }
-                    widget.store.addToCart(product, _selectedSize!);
+                    context.read<CartProvider>().addToCart(product, _selectedSize!);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text('${product.name} added to your bag'),
                       behavior: SnackBarBehavior.floating,

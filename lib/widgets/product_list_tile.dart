@@ -7,6 +7,8 @@ import 'product_image.dart';
 class ProductListTile extends StatelessWidget {
   final Product product;
   final bool favorite;
+  final bool inCart;
+  final VoidCallback? onCartToggle;
   final VoidCallback onTap;
   final VoidCallback onFavorite;
 
@@ -14,6 +16,8 @@ class ProductListTile extends StatelessWidget {
     super.key,
     required this.product,
     required this.favorite,
+    this.inCart = false,
+    this.onCartToggle,
     required this.onTap,
     required this.onFavorite,
   });
@@ -62,6 +66,26 @@ class ProductListTile extends StatelessWidget {
                   const SizedBox(height: 9),
                   Text(formatPrice(product.price),
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  if (onCartToggle != null) ...[
+                    const SizedBox(height: 5),
+                    SizedBox(
+                      height: 29,
+                      width: 96,
+                      child: OutlinedButton(
+                        onPressed: onCartToggle,
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                          backgroundColor: inCart ? const Color(0xFFFFE7E3) : null,
+                        ),
+                        child: Text(
+                          inCart ? 'Remove' : 'Add to Cart',
+                          maxLines: 1,
+                          style: const TextStyle(fontSize: 10),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],

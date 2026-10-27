@@ -7,6 +7,8 @@ import 'product_image.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final bool favorite;
+  final bool inCart;
+  final VoidCallback? onCartToggle;
   final VoidCallback onTap;
   final VoidCallback onFavorite;
 
@@ -14,6 +16,8 @@ class ProductCard extends StatelessWidget {
     super.key,
     required this.product,
     required this.favorite,
+    this.inCart = false,
+    this.onCartToggle,
     required this.onTap,
     required this.onFavorite,
   });
@@ -96,6 +100,26 @@ class ProductCard extends StatelessWidget {
                 ],
               ),
             ),
+            if (onCartToggle != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 7),
+                child: SizedBox(
+                  height: 29,
+                  child: OutlinedButton(
+                    onPressed: onCartToggle,
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: inCart ? const Color(0xFFFFE7E3) : null,
+                    ),
+                    child: Text(
+                      inCart ? 'Remove from bag' : 'Add to Cart',
+                      maxLines: 1,
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

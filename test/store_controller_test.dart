@@ -53,22 +53,6 @@ void main() {
     store.dispose();
   });
 
-  test('cart keeps the selected shoe size and calculates total', () {
-    final store = StoreController();
-    final product = sampleProducts.first;
-    store.addToCart(product, 42);
-    store.addToCart(product, 42);
-    store.addToCart(product, 43);
-    expect(store.cartCount, 3);
-    expect(store.cartTotal, product.price * 3);
-    expect(store.cart.length, 2);
-    expect(store.cart.first.size, 42);
-    expect(store.cart.first.quantity, 2);
-    store.changeCartQuantity(store.cart.first, -1);
-    expect(store.cartCount, 2);
-    store.dispose();
-  });
-
   test('register and sign out change the profile', () {
     final store = StoreController();
     expect(store.account, isNull);

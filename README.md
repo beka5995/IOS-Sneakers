@@ -103,3 +103,14 @@ flutter test
 ## Author
 
 **Mashat Bekzhan**
+
+
+## Shopping bag
+
+The catalog includes six sneakers with quick Add to Cart / Remove buttons.
+The bag icon in the top bar shows how many pairs are currently selected.
+The shopping bag supports per-item removal, quantity changes, total price
+in tenge, and Clear All. Changes immediately update the catalog controls.
+
+Cart contents are shared through CartProvider (ChangeNotifier) and stay in
+memory while the app is open. No real payments are processed.

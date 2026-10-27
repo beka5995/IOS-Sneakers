@@ -2,27 +2,18 @@ import 'package:flutter/foundation.dart';
 
 import '../data/sample_products.dart';
 import '../models/account.dart';
-import '../models/cart_item.dart';
 import '../models/product.dart';
 
 class StoreController extends ChangeNotifier {
   final List<Product> _products = List<Product>.of(sampleProducts);
   final Set<String> _favoriteIds = {};
-  final Map<String, CartItem> _cart = {};
   Account? _account;
   int _newProductNumber = 0;
 
   List<Product> get products => List.unmodifiable(_products);
   Account? get account => _account;
-  List<CartItem> get cart => List.unmodifiable(_cart.values);
   List<Product> get favorites => List.unmodifiable(
         _products.where((product) => _favoriteIds.contains(product.id)),
-      );
-
-  int get cartCount => _cart.values.fold(0, (sum, item) => sum + item.quantity);
-  int get cartTotal => _cart.values.fold(
-        0,
-        (sum, item) => sum + item.product.price * item.quantity,
       );
 
   bool isFavorite(String id) => _favoriteIds.contains(id);
@@ -72,35 +63,6 @@ class StoreController extends ChangeNotifier {
         isNew: true,
       ),
     );
-    notifyListeners();
-  }
-
-  void addToCart(Product product, int size) {
-    final id = '${product.id}_$size';
-    final oldItem = _cart[id];
-    _cart[id] = CartItem(
-      product: product,
-      size: size,
-      quantity: (oldItem?.quantity ?? 0) + 1,
-    );
-    notifyListeners();
-  }
-
-  void changeCartQuantity(CartItem item, int difference) {
-    final id = '${item.product.id}_${item.size}';
-    final current = _cart[id];
-    if (current == null) return;
-    final nextQuantity = current.quantity + difference;
-    if (nextQuantity <= 0) {
-      _cart.remove(id);
-    } else {
-      _cart[id] = current.withQuantity(nextQuantity);
-    }
-    notifyListeners();
-  }
-
-  void clearCart() {
-    _cart.clear();
     notifyListeners();
   }
 

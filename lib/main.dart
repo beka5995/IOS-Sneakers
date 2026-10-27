@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'providers/cart_provider.dart';
 
 import 'screens/home_shell.dart';
 import 'state/store_controller.dart';
@@ -25,7 +28,9 @@ class _SneakersAppState extends State<SneakersApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ChangeNotifierProvider<CartProvider>(
+      create: (_) => CartProvider(),
+      child: MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'SneakShop',
       theme: ThemeData(
@@ -47,6 +52,7 @@ class _SneakersAppState extends State<SneakersApp> {
         ),
       ),
       home: HomeShell(store: _store),
+      ),
     );
   }
 }

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/cart_provider.dart';
 
 import '../state/store_controller.dart';
 import 'cart_screen.dart';
@@ -24,18 +27,17 @@ class _HomeShellState extends State<HomeShell> {
       appBar: AppBar(
         title: const Text('SneakShop', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 25)),
         actions: [
-          AnimatedBuilder(
-            animation: widget.store,
-            builder: (context, _) {
+          Consumer<CartProvider>(
+            builder: (context, cart, _) {
               return Badge(
-                isLabelVisible: widget.store.cartCount > 0,
-                label: Text('${widget.store.cartCount}'),
+                isLabelVisible: cart.itemCount > 0,
+                label: Text('${cart.itemCount}'),
                 child: IconButton(
                   icon: const Icon(Icons.shopping_bag_outlined),
                   tooltip: 'Shopping bag',
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(
-                      builder: (_) => CartScreen(store: widget.store),
+                      builder: (_) => const CartScreen(),
                     ));
                   },
                 ),
