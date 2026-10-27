@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
 
+import '../database/local_auth.dart';
 import '../models/account.dart';
 import '../state/store_controller.dart';
 
@@ -14,41 +16,121 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  final _confirm = TextEditingController();
+
+  bool _registerMode = false;
   bool _acceptTerms = false;
-  bool _showTermsError = false;
+  bool _termsError = false;
   bool _hidePassword = true;
+  bool _busy = false;
   String _role = 'Student';
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmController.dispose();
+    _name.dispose();
+    _email.dispose();
+    _password.dispose();
+    _confirm.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    final validFields = _formKey.currentState!.validate();
-    setState(() => _showTermsError = !_acceptTerms);
-    if (!validFields || !_acceptTerms) return;
+  void _switchMode() {
+    FocusScope.of(context).unfocus();
 
-    final account = Account(
-      fullName: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      role: _role,
-    );
-    // Don't log passwords to the console.
-    debugPrint('Registered: ${account.fullName}, ${account.email}, ${account.role}');
-    widget.store.register(account);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Account created successfully!'),
-      behavior: SnackBarBehavior.floating,
-    ));
+    setState(() {
+      _registerMode = !_registerMode;
+      _termsError = false;
+      _password.clear();
+      _confirm.clear();
+    });
+
+    _formKey.currentState?.reset();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_registerMode && !_acceptTerms) {
+      setState(() => _termsError = true);
+      return;
+    }
+
+    setState(() => _busy = true);
+
+    try {
+      final Account account;
+
+      if (_registerMode) {
+        account = await LocalAuth.instance.register(
+          name: _name.text,
+          email: _email.text,
+          password: _password.text,
+          role: _role,
+        );
+      } else {
+        account = await LocalAuth.instance.login(
+          _email.text,
+          _password.text,
+        );
+      }
+
+      if (!mounted) return;
+
+      widget.store.register(account);
+      _password.clear();
+      _confirm.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Welcome to SneakShop!'),
+        ),
+      );
+    } on StateError catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message.toString())),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong'),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _busy = false);
+      }
+    }
+  }
+
+  Future<void> _logout() async {
+    try {
+      await LocalAuth.instance.logout();
+
+      if (!mounted) return;
+
+      widget.store.signOut();
+      _password.clear();
+      _confirm.clear();
+
+      setState(() {
+        _registerMode = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not sign out'),
+        ),
+      );
+    }
   }
 
   @override
@@ -57,13 +139,247 @@ class _ProfileScreenState extends State<ProfileScreen> {
       animation: widget.store,
       builder: (context, _) {
         final account = widget.store.account;
+
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 550),
-            child: account == null ? _registrationForm() : _accountProfile(account),
+            child: account == null
+                ? _authForm()
+                : _accountProfile(account),
           ),
         );
       },
+    );
+  }
+
+  Widget _authForm() {
+    return Column(
+      children: [
+        Expanded(
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              children: [
+                const SizedBox(height: 10),
+
+                Text(
+                  _registerMode ? 'Create account' : 'Welcome back',
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  _registerMode
+                      ? 'Create your SneakShop account'
+                      : 'Sign in to your account',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+
+                const SizedBox(height: 25),
+
+                if (_registerMode) ...[
+                  TextFormField(
+                    controller: _name,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      labelText: 'Full name',
+                      prefixIcon: Icon(Icons.person_outline),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Enter your name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                ],
+
+                TextFormField(
+                  controller: _email,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    prefixIcon: Icon(Icons.email_outlined),
+                  ),
+                  validator: (value) {
+                    final email = (value ?? '').trim();
+
+                    if (!RegExp(
+                      r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                    ).hasMatch(email)) {
+                      return 'Enter a valid email';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 14),
+
+                TextFormField(
+                  controller: _password,
+                  obscureText: _hidePassword,
+                  onChanged: (_) {
+                    if (_registerMode && _confirm.text.isNotEmpty) {
+                      _formKey.currentState?.validate();
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _hidePassword
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _hidePassword = !_hidePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Enter your password';
+                    }
+
+                    if (_registerMode && value.length < 6) {
+                      return 'Minimum 6 characters';
+                    }
+
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 14),
+
+                if (_registerMode) ...[
+                  TextFormField(
+                    controller: _confirm,
+                    obscureText: _hidePassword,
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm password',
+                      prefixIcon: Icon(Icons.lock_reset_outlined),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Confirm your password';
+                      }
+
+                      if (value != _password.text) {
+                        return 'Passwords do not match';
+                      }
+
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  DropdownButtonFormField<String>(
+                    initialValue: _role,
+                    decoration: const InputDecoration(
+                      labelText: 'Account type',
+                    ),
+                    items: ['Student', 'Teacher', 'Developer']
+                        .map(
+                          (role) => DropdownMenuItem(
+                        value: role,
+                        child: Text(role),
+                      ),
+                    )
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _role = value ?? 'Student';
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  CheckboxListTile(
+                    value: _acceptTerms,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text(
+                      'I accept the Terms and Conditions',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _acceptTerms = value ?? false;
+                        _termsError = false;
+                      });
+                    },
+                  ),
+
+                  if (_termsError)
+                    const Text(
+                      'Please accept the Terms and Conditions',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                      ),
+                    ),
+                ],
+
+                const SizedBox(height: 16),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: FilledButton(
+                    onPressed: _busy ? null : _submit,
+                    child: _busy
+                        ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )
+                        : Text(
+                      _registerMode
+                          ? 'Create account'
+                          : 'Sign in',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 6, 12, 10),
+            child: SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: _busy ? null : _switchMode,
+                child: Text(
+                  _registerMode
+                      ? 'Already have an account? Sign in'
+                      : 'New to SneakShop? Create account',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -71,144 +387,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const SizedBox(height: 20),
+        const SizedBox(height: 30),
+
         const CircleAvatar(
-          radius: 36,
+          radius: 38,
           backgroundColor: Color(0xFFFFE0DB),
-          child: Icon(Icons.person, size: 40, color: Color(0xFFE25448)),
+          child: Icon(
+            Icons.person,
+            size: 42,
+            color: Color(0xFFE25448),
+          ),
         ),
+
         const SizedBox(height: 16),
-        Center(child: Text(account.fullName, style: const TextStyle(
-          fontSize: 24, fontWeight: FontWeight.bold,
-        ))),
+
+        Center(
+          child: Text(
+            account.fullName,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+
         const SizedBox(height: 5),
-        Center(child: Text(account.email, style: const TextStyle(color: Colors.grey))),
-        const SizedBox(height: 22),
+
+        Center(
+          child: Text(account.email),
+        ),
+
+        const SizedBox(height: 25),
+
         Card(
-          color: Colors.white,
           child: ListTile(
             leading: const Icon(Icons.badge_outlined),
             title: const Text('Account type'),
             subtitle: Text(account.role),
           ),
         ),
-        const SizedBox(height: 12),
+
+        const SizedBox(height: 15),
+
         OutlinedButton.icon(
+          onPressed: _logout,
           icon: const Icon(Icons.logout),
-          onPressed: widget.store.signOut,
           label: const Text('Sign out'),
         ),
       ],
-    );
-  }
-
-  Widget _registrationForm() {
-    return Form(
-      key: _formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
-        children: [
-          const Text('Create account', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          const Text('Make an account to keep your details in one place.',
-              style: TextStyle(color: Colors.grey)),
-          const SizedBox(height: 22),
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Full name', prefixIcon: Icon(Icons.person_outline)),
-            textCapitalization: TextCapitalization.words,
-            validator: (value) => value == null || value.trim().isEmpty
-                ? 'Enter your full name' : null,
-          ),
-          const SizedBox(height: 14),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.mail_outline)),
-            validator: (value) {
-              final email = (value ?? '').trim();
-              if (email.isEmpty) return 'Email is required';
-              if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
-                return 'Enter a valid email address';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 14),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _hidePassword,
-            onChanged: (_) {
-              if (_confirmController.text.isNotEmpty) {
-                _formKey.currentState?.validate();
-              }
-            },
-            decoration: InputDecoration(
-              labelText: 'Password',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                onPressed: () => setState(() => _hidePassword = !_hidePassword),
-                icon: Icon(_hidePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-              ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) return 'Password is required';
-              if (value.length < 6) return 'Use at least 6 characters';
-              return null;
-            },
-          ),
-          const SizedBox(height: 14),
-          TextFormField(
-            controller: _confirmController,
-            obscureText: _hidePassword,
-            decoration: const InputDecoration(
-              labelText: 'Confirm password', prefixIcon: Icon(Icons.lock_reset_outlined),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) return 'Please confirm your password';
-              if (value != _passwordController.text) return 'Passwords do not match';
-              return null;
-            },
-          ),
-          const SizedBox(height: 15),
-          DropdownButtonFormField<String>(
-            initialValue: _role,
-            decoration: const InputDecoration(labelText: 'Account type'),
-            items: ['Student', 'Teacher', 'Developer'].map((role) {
-              return DropdownMenuItem(value: role, child: Text(role));
-            }).toList(),
-            onChanged: (value) => setState(() => _role = value ?? 'Student'),
-          ),
-          const SizedBox(height: 6),
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            value: _acceptTerms,
-            title: const Text('I accept the Terms and Conditions',
-                style: TextStyle(fontSize: 13)),
-            onChanged: (value) => setState(() {
-              _acceptTerms = value ?? false;
-              _showTermsError = false;
-            }),
-          ),
-          if (_showTermsError)
-            const Padding(
-              padding: EdgeInsets.only(left: 10, bottom: 10),
-              child: Text('Please accept the Terms and Conditions',
-                  style: TextStyle(color: Color(0xFFB3261E), fontSize: 12)),
-            ),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 50,
-            child: FilledButton(onPressed: _submit, child: const Text('Create account')),
-          ),
-          const SizedBox(height: 12),
-          const Text('This demo account is stored only while the app is running.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 11)),
-        ],
-      ),
     );
   }
 }

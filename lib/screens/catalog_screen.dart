@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/cart_provider.dart';
 
 import '../models/product.dart';
 import '../state/store_controller.dart';
@@ -74,6 +77,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cart = context.watch<CartProvider>();
     return AnimatedBuilder(
       animation: widget.store,
       builder: (context, _) {
@@ -171,7 +175,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             ? _emptyCatalog()
                             : visible.isEmpty
                                 ? const Center(child: Text('No sneakers found. Try another search.'))
-                                : _showGrid ? _grid(visible) : _list(visible),
+                                : _showGrid ? _grid(visible, cart) : _list(visible, cart),
                       ),
                     ],
                   );
@@ -184,7 +188,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  Widget _grid(List<Product> products) {
+  Widget _grid(List<Product> products, CartProvider cart) {
     return RefreshIndicator(
       onRefresh: _refreshProducts,
       child: GridView.builder(
@@ -204,6 +208,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
             key: ValueKey(product.id),
             product: product,
             favorite: widget.store.isFavorite(product.id),
+            inCart: cart.containsProduct(product.id),
+            onCartToggle: () => cart.toggleProduct(product),
             onTap: () => _openProduct(product),
             onFavorite: () => widget.store.toggleFavorite(product.id),
           );
@@ -212,7 +218,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  Widget _list(List<Product> products) {
+  Widget _list(List<Product> products, CartProvider cart) {
     return RefreshIndicator(
       onRefresh: _refreshProducts,
       child: ListView.separated(
@@ -236,6 +242,8 @@ class _CatalogScreenState extends State<CatalogScreen> {
             child: ProductListTile(
               product: product,
               favorite: widget.store.isFavorite(product.id),
+              inCart: cart.containsProduct(product.id),
+              onCartToggle: () => cart.toggleProduct(product),
               onTap: () => _openProduct(product),
               onFavorite: () => widget.store.toggleFavorite(product.id),
             ),
