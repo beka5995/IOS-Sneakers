@@ -1,3 +1,4 @@
+
 import 'package:flutter/foundation.dart';
 
 import '../data/sample_products.dart';
@@ -13,8 +14,8 @@ class StoreController extends ChangeNotifier {
   List<Product> get products => List.unmodifiable(_products);
   Account? get account => _account;
   List<Product> get favorites => List.unmodifiable(
-        _products.where((product) => _favoriteIds.contains(product.id)),
-      );
+    _products.where((product) => _favoriteIds.contains(product.id)),
+  );
 
   bool isFavorite(String id) => _favoriteIds.contains(id);
 
@@ -47,12 +48,14 @@ class StoreController extends ChangeNotifier {
 
   void addFreshProduct() {
     _newProductNumber++;
-    final template = sampleProducts[_newProductNumber % sampleProducts.length];
+    final template =
+    sampleProducts[(_newProductNumber - 1) % sampleProducts.length];
+
     _products.insert(
       0,
       Product(
         id: 'new_$_newProductNumber',
-        name: 'Fresh Drop $_newProductNumber',
+        name: 'New ${template.name}',
         brand: template.brand,
         category: template.category,
         description: 'Just added to the shop. ${template.description}',
