@@ -6,11 +6,7 @@ class PhotoGallery extends StatefulWidget {
   final List<String> photos;
   final String heroTag;
 
-  const PhotoGallery({
-    super.key,
-    required this.photos,
-    required this.heroTag,
-  });
+  const PhotoGallery({super.key, required this.photos, required this.heroTag});
 
   @override
   State<PhotoGallery> createState() => _PhotoGalleryState();
@@ -92,7 +88,9 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                       borderRadius: BorderRadius.circular(18),
                       child: Transform.scale(
                         scale: index == 1 ? 1.18 : 1.35,
-                        alignment: index == 1 ? Alignment.topCenter : Alignment.bottomCenter,
+                        alignment: index == 1
+                            ? Alignment.topCenter
+                            : Alignment.bottomCenter,
                         child: photo,
                       ),
                     );
@@ -112,10 +110,16 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     child: Text(
                       '${_page + 1} / ${images.length}',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -140,7 +144,9 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                   child: Center(
                     child: IconButton.filledTonal(
                       tooltip: 'Next photo',
-                      onPressed: _page == images.length - 1 ? null : () => _go(_page + 1),
+                      onPressed: _page == images.length - 1
+                          ? null
+                          : () => _go(_page + 1),
                       icon: const Icon(Icons.chevron_right),
                     ),
                   ),
@@ -152,17 +158,22 @@ class _PhotoGalleryState extends State<PhotoGallery> {
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(images.length, (index) => AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeInOut,
-            width: _page == index ? 21 : 8,
-            height: 8,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: _page == index ? const Color(0xFFE25448) : Colors.black26,
-              borderRadius: BorderRadius.circular(8),
+          children: List.generate(
+            images.length,
+            (index) => AnimatedContainer(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeInOut,
+              width: _page == index ? 21 : 8,
+              height: 8,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: _page == index
+                    ? const Color(0xFFE25448)
+                    : Theme.of(context).colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-          )),
+          ),
         ),
       ],
     );

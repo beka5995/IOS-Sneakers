@@ -25,7 +25,7 @@ class ProductListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -34,7 +34,11 @@ class ProductListTile extends StatelessWidget {
             children: [
               Hero(
                 tag: 'sneaker_image_${product.id}',
-                child: ProductImage(url: product.imageUrl, width: 82, height: 86),
+                child: ProductImage(
+                  url: product.imageUrl,
+                  width: 82,
+                  height: 86,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -42,20 +46,51 @@ class ProductListTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(product.brand, maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                    Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.w600)),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      margin: const EdgeInsets.symmetric(vertical: 3),
-                      decoration: BoxDecoration(color: const Color(0xFFF4F0EC), borderRadius: BorderRadius.circular(5)),
-                      child: Text(product.category, style: const TextStyle(fontSize: 10, color: Colors.black54)),
+                    Text(
+                      product.brand,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
                     ),
-                    Row(children: [
-                      const Icon(Icons.star_rounded, color: Color(0xFFF2AA40), size: 15),
-                      Text('${product.rating}', style: const TextStyle(fontSize: 11)),
-                    ]),
+                    Text(
+                      product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      margin: const EdgeInsets.symmetric(vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        product.category,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer,
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          color: Color(0xFFF2AA40),
+                          size: 15,
+                        ),
+                        Text(
+                          '${product.rating}',
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -65,15 +100,26 @@ class ProductListTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
                     padding: EdgeInsets.zero,
                     onPressed: onFavorite,
-                    icon: Icon(favorite ? Icons.favorite : Icons.favorite_border,
-                        size: 21, color: favorite ? const Color(0xFFE25448) : Colors.grey),
+                    icon: Icon(
+                      favorite ? Icons.favorite : Icons.favorite_border,
+                      size: 21,
+                      color: favorite ? const Color(0xFFE25448) : Colors.grey,
+                    ),
                   ),
                   const SizedBox(height: 9),
-                  Text(formatPrice(product.price),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                  Text(
+                    formatPrice(product.price),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
                   if (onCartToggle != null) ...[
                     const SizedBox(height: 5),
                     SizedBox(
@@ -84,7 +130,9 @@ class ProductListTile extends StatelessWidget {
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.zero,
                           visualDensity: VisualDensity.compact,
-                          backgroundColor: inCart ? const Color(0xFFFFE7E3) : null,
+                          backgroundColor: inCart
+                              ? Theme.of(context).colorScheme.secondaryContainer
+                              : null,
                         ),
                         child: Text(
                           inCart ? 'Remove' : 'Add to Cart',

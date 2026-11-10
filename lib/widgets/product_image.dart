@@ -56,6 +56,7 @@ class ProductImage extends StatelessWidget {
         height: height,
         color: const Color(0xFFF0F0F0),
         alignment: Alignment.center,
-        child: const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+        child:
+            const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
       );
 }

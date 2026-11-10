@@ -27,10 +27,10 @@ class ProductCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       elevation: 0,
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: Color(0xFFE9E9E9)),
+        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -50,17 +50,28 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   if (product.isNew)
-                    const Positioned(
+                    Positioned(
                       left: 8,
                       top: 8,
                       child: DecoratedBox(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Color(0xFF242424),
                           borderRadius: BorderRadius.all(Radius.circular(7)),
                         ),
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                          child: Text('NEW', style: TextStyle(color: Colors.white, fontSize: 10)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 3,
+                          ),
+                          child: Text(
+                            'NEW',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerLow,
+                              fontSize: 10,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -69,11 +80,16 @@ class ProductCard extends StatelessWidget {
                     top: 3,
                     child: IconButton(
                       visualDensity: VisualDensity.compact,
-                      style: IconButton.styleFrom(backgroundColor: const Color(0xE6FFFFFF)),
+                      style: IconButton.styleFrom(
+                        backgroundColor: const Color(0xE6FFFFFF),
+                      ),
                       iconSize: 20,
                       onPressed: onFavorite,
-                      icon: Icon(favorite ? Icons.favorite : Icons.favorite_border,
-                          color: favorite ? const Color(0xFFE25448) : Colors.black87),
+                      icon: Icon(
+                        favorite ? Icons.favorite : Icons.favorite_border,
+                        color:
+                            favorite ? const Color(0xFFE25448) : Colors.black87,
+                      ),
                     ),
                   ),
                 ],
@@ -85,21 +101,45 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(product.brand, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: Colors.grey)),
+                  Text(
+                    product.brand,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
                   const SizedBox(height: 2),
-                  Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text(
+                    product.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   const SizedBox(height: 3),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, color: Color(0xFFF2AA40), size: 14),
-                      Text(' ${product.rating}', style: const TextStyle(fontSize: 11)),
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFFF2AA40),
+                        size: 14,
+                      ),
+                      Text(
+                        ' ${product.rating}',
+                        style: const TextStyle(fontSize: 11),
+                      ),
                       const Spacer(),
                       Flexible(
-                        child: Text(formatPrice(product.price),
-                            maxLines: 1, overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          formatPrice(product.price),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -116,7 +156,9 @@ class ProductCard extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.zero,
                       visualDensity: VisualDensity.compact,
-                      backgroundColor: inCart ? const Color(0xFFFFE7E3) : null,
+                      backgroundColor: inCart
+                          ? Theme.of(context).colorScheme.secondaryContainer
+                          : null,
                     ),
                     child: Text(
                       inCart ? 'Remove from bag' : 'Add to Cart',

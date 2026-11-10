@@ -5,13 +5,18 @@ import '../models/product.dart';
 
 class CartProvider extends ChangeNotifier {
   final Map<String, CartItem> _items = {};
+  CartProvider({List<CartItem> initialItems = const []}) {
+    for (final item in initialItems) {
+      _items[_key(item.product, item.size)] = item;
+    }
+  }
 
   List<CartItem> get items => List.unmodifiable(_items.values);
-  int get itemCount => _items.values.fold<int>(
-        0, (sum, item) => sum + item.quantity,
-      );
+  int get itemCount =>
+      _items.values.fold<int>(0, (sum, item) => sum + item.quantity);
   double get totalPrice => _items.values.fold<double>(
-        0.0, (sum, item) => sum + item.product.price * item.quantity,
+        0.0,
+        (sum, item) => sum + item.product.price * item.quantity,
       );
 
   String _key(Product product, int size) => '${product.id}_$size';
@@ -41,9 +46,9 @@ class CartProvider extends ChangeNotifier {
   }
 
   void removeProduct(String productId) {
-    final keys = _items.keys.where(
-      (key) => _items[key]!.product.id == productId,
-    ).toList();
+    final keys = _items.keys
+        .where((key) => _items[key]!.product.id == productId)
+        .toList();
     if (keys.isEmpty) return;
     for (final key in keys) {
       _items.remove(key);
@@ -68,6 +73,23 @@ class CartProvider extends ChangeNotifier {
       _items[key] = current.withQuantity(next);
     }
     notifyListeners();
+  }
+
+  void updateProducts(Map<String, Product> products) {
+    var changed = false;
+    for (final key in _items.keys.toList()) {
+      final item = _items[key]!;
+      final product = products[item.product.id];
+      if (product != null && !identical(product, item.product)) {
+        _items[key] = CartItem(
+          product: product,
+          size: item.size,
+          quantity: item.quantity,
+        );
+        changed = true;
+      }
+    }
+    if (changed) notifyListeners();
   }
 
   void clear() {

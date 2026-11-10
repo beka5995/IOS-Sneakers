@@ -17,7 +17,7 @@ The initial catalog requires internet. No GitHub setup, API key or separate serv
 
 - Six products appear initially, obtained from the HTTP responses.
 - Grid/list toggle, name/brand search and Men/Women filters.
-- Favorite any product; favorites and cart retain already selected objects during the running session.
+- Favorite any product; favorites and cart are saved locally and restored after restarting the app.
 - Details show the exact selected product, USD price, rating, photo gallery,
   size options, full-screen photo zoom, Share and sticky Add to Cart.
 - Global CartProvider: live badge, per-size quantities, remove and Clear All.
@@ -64,7 +64,7 @@ Reset Catalog performs a fresh network request and restores the first six produc
 4. Restore the connection; the app requests the collection again. Retry also works manually.
 5. In Chrome: F12 → Network → Offline. If the browser does not emit an offline event,
    press Refresh inside the app. Restore No throttling and press Retry Connection.
-6. Selected cart/favorite objects are preserved in the current session; their cards are
+6. Selected cart/favorite objects are restored from local storage after restart; their cards are
    not substitutes for a successful Home catalog request.
 
 ## Checks
@@ -77,6 +77,11 @@ flutter build web
 
 On Windows, `.\check_project.ps1` runs all these checks after `flutter pub get`.
 
-The delivery environment has no Flutter SDK. Analyzer, Flutter tests, web build and
-emulator verification were not run there. Dart syntax, imports, platform settings,
-resources and absence of local catalog fallback were checked statically.
+See LAB11_CHECK.md for the current analyzer, test and web build results. Native device verification remains a local defense step.
+
+
+## LAB 11: local notes and settings
+
+The Notes button in the upper-right app bar, beside the cart, opens a persisted Dark/Light switch, display name and note checklist. SharedPreferences is loaded before runApp; all note mutations serialize the list to one JSON string. See `LAB11_RU.md` for source locations and the real force-quit verification steps. Passwords/tokens are not stored in preferences. Catalog network behavior from LAB 10 is preserved.
+
+For Chrome, use `powershell -ExecutionPolicy Bypass -File .\run_web.ps1`; a fixed app-specific port keeps the browser storage origin stable across launches. Account authentication remains in SQLite. LAB 11 persists theme, display name, notes, favorites and cart/trip selections. The bottom navigation has three tabs; Notes opens as a separate screen and Back restores the previous tab.

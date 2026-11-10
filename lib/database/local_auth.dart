@@ -56,10 +56,12 @@ class LocalAuth {
     final db = await database;
 
     await db.insert(
-      'active_session',
-      {'slot': 1, 'user_id': userId},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+        'active_session',
+        {
+          'slot': 1,
+          'user_id': userId,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<Account> register({
@@ -81,10 +83,7 @@ class LocalAuth {
       throw StateError('This email is already registered');
     }
 
-    final passwordHash = BCrypt.hashpw(
-      password,
-      BCrypt.gensalt(),
-    );
+    final passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
 
     final id = await db.insert('users', {
       'name': name.trim(),
@@ -95,11 +94,7 @@ class LocalAuth {
 
     await _saveSession(id);
 
-    return Account(
-      fullName: name.trim(),
-      email: email,
-      role: role,
-    );
+    return Account(fullName: name.trim(), email: email, role: role);
   }
 
   Future<Account> login(String email, String password) async {

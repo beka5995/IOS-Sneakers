@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../database/local_auth.dart';
@@ -68,40 +67,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           role: _role,
         );
       } else {
-        account = await LocalAuth.instance.login(
-          _email.text,
-          _password.text,
-        );
+        account = await LocalAuth.instance.login(_email.text, _password.text);
       }
 
       if (!mounted) return;
 
       if (_registerMode) {
-        debugPrint('Registered: name=${account.fullName}, email=${account.email}, role=${account.role}');
+        debugPrint(
+          'Registered: name=${account.fullName}, email=${account.email}, role=${account.role}',
+        );
       }
       widget.store.register(account);
       _password.clear();
       _confirm.clear();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Welcome to SneakShop!'),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Welcome to SneakShop!')));
     } on StateError catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message.toString())),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message.toString())));
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong'),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Something went wrong')));
     } finally {
       if (mounted) {
         setState(() => _busy = false);
@@ -125,11 +116,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not sign out'),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Could not sign out')));
     }
   }
 
@@ -143,9 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 550),
-            child: account == null
-                ? _authForm()
-                : _accountProfile(account),
+            child: account == null ? _authForm() : _accountProfile(account),
           ),
         );
       },
@@ -163,7 +149,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
               children: [
                 const SizedBox(height: 10),
-
                 Text(
                   _registerMode ? 'Create account' : 'Welcome back',
                   style: const TextStyle(
@@ -171,18 +156,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 Text(
                   _registerMode
                       ? 'Create your SneakShop account'
                       : 'Sign in to your account',
                   style: const TextStyle(color: Colors.grey),
                 ),
-
                 const SizedBox(height: 25),
-
                 if (_registerMode) ...[
                   TextFormField(
                     controller: _name,
@@ -200,7 +181,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 14),
                 ],
-
                 TextFormField(
                   controller: _email,
                   keyboardType: TextInputType.emailAddress,
@@ -211,18 +191,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   validator: (value) {
                     final email = (value ?? '').trim();
 
-                    if (!RegExp(
-                      r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                    ).hasMatch(email)) {
+                    if (!RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+                        .hasMatch(email)) {
                       return 'Enter a valid email';
                     }
 
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 14),
-
                 TextFormField(
                   controller: _password,
                   obscureText: _hidePassword,
@@ -259,9 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 14),
-
                 if (_registerMode) ...[
                   TextFormField(
                     controller: _confirm,
@@ -282,9 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       return null;
                     },
                   ),
-
                   const SizedBox(height: 14),
-
                   DropdownButtonFormField<String>(
                     initialValue: _role,
                     decoration: const InputDecoration(
@@ -292,11 +265,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     items: ['Shopper', 'Sneaker collector', 'Streetwear fan']
                         .map(
-                          (role) => DropdownMenuItem(
-                        value: role,
-                        child: Text(role),
-                      ),
-                    )
+                          (role) =>
+                              DropdownMenuItem(value: role, child: Text(role)),
+                        )
                         .toList(),
                     onChanged: (value) {
                       setState(() {
@@ -304,9 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       });
                     },
                   ),
-
                   const SizedBox(height: 8),
-
                   CheckboxListTile(
                     value: _acceptTerms,
                     controlAffinity: ListTileControlAffinity.leading,
@@ -322,19 +291,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       });
                     },
                   ),
-
                   if (_termsError)
                     const Text(
                       'Please accept the Terms and Conditions',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.red, fontSize: 12),
                     ),
                 ],
-
                 const SizedBox(height: 16),
-
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -342,24 +305,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: _busy ? null : _submit,
                     child: _busy
                         ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                        : Text(
-                      _registerMode
-                          ? 'Create account'
-                          : 'Sign in',
-                    ),
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(_registerMode ? 'Create account' : 'Sign in'),
                   ),
                 ),
               ],
             ),
           ),
         ),
-
         SafeArea(
           top: false,
           child: Padding(
@@ -388,37 +344,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(20),
       children: [
         const SizedBox(height: 30),
-
-        const CircleAvatar(
+        CircleAvatar(
           radius: 38,
-          backgroundColor: Color(0xFFFFE0DB),
-          child: Icon(
-            Icons.person,
-            size: 42,
-            color: Color(0xFFE25448),
-          ),
+          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          child: const Icon(Icons.person, size: 42, color: Color(0xFFE25448)),
         ),
-
         const SizedBox(height: 16),
-
         Center(
           child: Text(
             account.fullName,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
         ),
-
         const SizedBox(height: 5),
-
-        Center(
-          child: Text(account.email),
-        ),
-
+        Center(child: Text(account.email)),
         const SizedBox(height: 25),
-
         Card(
           child: ListTile(
             leading: const Icon(Icons.badge_outlined),
@@ -426,9 +366,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             subtitle: Text(account.role),
           ),
         ),
-
         const SizedBox(height: 15),
-
         OutlinedButton.icon(
           onPressed: _logout,
           icon: const Icon(Icons.logout),

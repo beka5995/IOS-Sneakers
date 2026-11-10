@@ -8,6 +8,8 @@ import 'cart_screen.dart';
 import 'catalog_screen.dart';
 import 'favorites_screen.dart';
 import 'profile_screen.dart';
+import 'notes_screen.dart';
+import '../state/preferences_store.dart';
 
 class HomeShell extends StatefulWidget {
   final StoreController store;
@@ -25,8 +27,35 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SneakShop', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 25)),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'SneakShop',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 25),
+            ),
+            Text(
+              context.watch<PreferencesStore>().displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
         actions: [
+          IconButton(
+            tooltip: 'Notes',
+            icon: const Icon(Icons.edit_note_rounded),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => Scaffold(
+                  appBar: AppBar(title: const Text('Notes')),
+                  body: const NotesScreen(),
+                ),
+              ),
+            ),
+          ),
           Consumer<CartProvider>(
             builder: (context, cart, _) {
               return Badge(
@@ -36,9 +65,10 @@ class _HomeShellState extends State<HomeShell> {
                   icon: const Icon(Icons.shopping_bag_outlined),
                   tooltip: 'Shopping bag',
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (_) => const CartScreen(),
-                    ));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CartScreen()),
+                    );
                   },
                 ),
               );
@@ -50,8 +80,14 @@ class _HomeShellState extends State<HomeShell> {
       body: IndexedStack(
         index: _selectedIndex,
         children: [
-          CatalogScreen(store: widget.store),
-          FavoritesScreen(store: widget.store),
+          HeroMode(
+            enabled: _selectedIndex == 0,
+            child: CatalogScreen(store: widget.store),
+          ),
+          HeroMode(
+            enabled: _selectedIndex == 1,
+            child: FavoritesScreen(store: widget.store),
+          ),
           ProfileScreen(store: widget.store),
         ],
       ),
@@ -59,12 +95,24 @@ class _HomeShellState extends State<HomeShell> {
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFFE25448),
-        unselectedItemColor: Colors.grey.shade600,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurfaceVariant,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), activeIcon: Icon(Icons.favorite), label: 'Favorites'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_border),
+            activeIcon: Icon(Icons.favorite),
+            label: 'Favorites',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );

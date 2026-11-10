@@ -18,10 +18,7 @@ class CartScreen extends StatelessWidget {
         title: const Text('Shopping bag'),
         actions: [
           if (items.isNotEmpty)
-            TextButton(
-              onPressed: cart.clear,
-              child: const Text('Clear All'),
-            ),
+            TextButton(onPressed: cart.clear, child: const Text('Clear All')),
           const SizedBox(width: 8),
         ],
       ),
@@ -33,8 +30,11 @@ class CartScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.shopping_bag_outlined, size: 56,
-                          color: Colors.grey),
+                      Icon(
+                        Icons.shopping_bag_outlined,
+                        size: 56,
+                        color: Colors.grey,
+                      ),
                       SizedBox(height: 12),
                       Text('Your bag is empty'),
                       SizedBox(height: 4),
@@ -65,13 +65,18 @@ class CartScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(item.product.name,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w600)),
-                              Text('EU ${item.size}',
-                                  style: const TextStyle(color: Colors.grey)),
+                              Text(
+                                item.product.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                'EU ${item.size}',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
                               const SizedBox(height: 4),
                               Text(formatPrice(item.product.price)),
                             ],
@@ -89,7 +94,8 @@ class CartScreen extends StatelessWidget {
                               children: [
                                 IconButton(
                                   tooltip: 'Decrease quantity',
-                                  onPressed: () => cart.changeQuantity(item, -1),
+                                  onPressed: () =>
+                                      cart.changeQuantity(item, -1),
                                   icon: const Icon(Icons.remove_circle_outline),
                                 ),
                                 Text('${item.quantity}'),
@@ -122,7 +128,9 @@ class CartScreen extends StatelessWidget {
                       Text(
                         formatPrice(cart.totalPrice),
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
                       ),
                     ],
                   ),

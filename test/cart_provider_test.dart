@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+
 import 'fixtures/catalog.dart';
+
 import 'package:final_project/providers/cart_provider.dart';
 
 void main() {
